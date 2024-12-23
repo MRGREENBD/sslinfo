@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+import ssl, socket ,sys
+import urllib.parse
+
+
+
+NewDomain = []
+
+def SSLinfo(Domain):
+	try:
+		if "://" in Domain:
+			Domain = Domain.split('://')[1]
+		else:
+			Domain = Domain
+		Domain = Domain.strip()
+		SSL = ssl.create_default_context()
+		Go = SSL.wrap_socket(socket.socket(), server_hostname=Domain)
+		Go.connect((Domain, 443))
+		SSLName = Go.getpeercert()
+		#print(SSLName)
+		try:
+			Detils = [dict(Name[0] for Name in SSLName['subject']),dict(Name[0] for Name in SSLName['issuer'])]
+			for Name in Detils:
+				print("Domain : "+Domain +"\nOrganization : "+Name['organizationName'],"\nCountry : "+Name['countryName'])
+				print("CRT : https://crt.sh/?O="+urllib.parse.quote(Name['organizationName']))
+				print("SHODAN : https://www.shodan.io/search?query=ssl:'"+urllib.parse.quote(Name['organizationName'])+"'")
+				print("SHODAN : https://www.shodan.io/search?query=Ssl.cert.subject.CN:'"+Domain+"'\n")
+
+		except:
+			Detils = dict(Name[0] for Name in SSLName['issuer'])
+			print("Domain : "+Domain +"\nOrganization : "+Detils['organizationName'],"\nCountry : "+Detils['countryName'])
+			print("CRT : https://crt.sh/?O="+urllib.parse.quote(Detils['organizationName']))
+			print("SHODAN : https://www.shodan.io/search?query=ssl:'"+urllib.parse.quote(Detils['organizationName'])+"'")
+			print("SHODAN : https://www.shodan.io/search?query=Ssl.cert.subject.CN:'"+Domain+"'\n")
+
+			pass
+		DNSS = []
+		for DNS in SSLName['subjectAltName']:
+			DNS = DNS[1]
+			if "*." in DNS:
+				DNS = DNS.replace("*.","")
+			DNSS.append(DNS)
+		DNSS = set(DNSS)
+		print('#'*25)
+		Num = 0
+		for URL in DNSS:
+			Num+=1
+			#print(URL)
+			NewDomain.append(URL)
+
+		print("\n")
+
+	except:
+		print("Fail : "+Domain)
+		pass
+
+
+
+if __name__ == '__main__':
+	try:
+		Domain = sys.argv[1]
+		Domains = open(Domain).readlines()
+		for Domain in Domains:
+			SSLinfo(Domain)
+		print("Found Domain "+str(len(set(NewDomain))))
+		for New in set(NewDomain):
+			open("DomainSSL.txt","a").write(New+'\n')
+	except FileNotFoundError:
+		print(Domain + " File Not Found")
+	except IndexError:
+		try:
+			Domains = sys.stdin.readlines()
+			if len(Domains) <1:
+				os._exit(1)
+			for Domain in Domains:
+				SSLinfo(Domain)
+			for New in set(NewDomain):
+				open("DomainSSL.txt","a").write(New+'\n')
+			print("Found Domain "+str(len(set(NewDomain))))
+		except KeyboardInterrupt:
+			os._exit(1)

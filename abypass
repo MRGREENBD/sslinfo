@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import requests ,urllib3
+import urllib.parse
+import os ,sys
+from multiprocessing import Pool
+from multiprocessing.dummy import Pool as PoolFire
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+if os.name=="nt":
+	os.system("cls")
+else:
+	os.system("clear")
+
+
+
+USERAGINT = {'User -Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+
+PATH = ["add-banner.php","add-client-logo.php","add-gallery.php","add-image.php","add-page.php","add-product.php","add-testimonial.php","add.php","add_categories.php","add_category.php","add_event.php","add_gallery.php","add_images.php","add_news.php","add_page.php","add_pdf.php","add_post.php","add_product.php","add_silder.php","add_user.php","addimage.php","addnews.php","addphoto.php","addpost.php","adduser.php","admin.php","admin_about.php","admin_admin.php","admin_admin.php	","admin_business.php	","admin_company.php	","admin_company_set.php	","admin_contact_admin.php	","admin_contact_us.php	","admin_email.php	","admin_index.php	","admin_index_image.php	","admin_new_product.php	","admin_order.php	","admin_order_admin.php	","admin_out.php	","admin_product.php	","admin_product_class.php	","admin_s_about.php	 	","admin_s_business.php	","admin_s_company.php	","admin_s_index.php	","admin_s_new_product.php	","admin_s_product.php","admin_s_product_class.php","articles.php","back_typeb.php","backup.zip","board.php","categories.php","change-password.php","change-product-status.php","change.php","change_password.php","config.txt","dashboard","dashboard.php","dbbackup.sql","edit-news.php","edit-page.php","edit-post.php","edit-user.php","edit.php","edit_news.php","edit_page.php","edit_post.php","edit_user.php","editnews.php","editpost.php","edituser.php","event.php","events.php","file-uplpad.php","form_object.php","gallery.php","get-subcat.php","home","home.php","image_upload.php","images.php","index.php","index1.php","list.php","login.php","logout.php","managers.php","message.php","mine.php","news.php","news_add.php","notice.php","notification.php","page-list.php","page.php","panel.php","password.php","photogallery.php","photos.php","pictures.php","post.php","price.php","product","product.php","profile","profile.php","registration.php","setting.php","slider.php","static.php","student.php","teacher.php","up.php","upload.php","user.php","usercontrol.php","view-banner.php","view-client-logo.php","view-gallery.php","view-image.php","view-mainc-ategory.php","view-product.php","view-sub-category.php","view-testimonial.php","view.php","view_banner.php","view_client-logo.php","view_gallery.php","view_main_category.php","view_sub-category.php","view_testimonial.php","viewi_mage.php","viewp_roduct.php","welcome.php"]
+
+def AdminBYPASS(AdminPATH):
+	AdminPATH = AdminPATH.strip()
+	try:
+		Go = requests.get(Domain.strip()+"/"+AdminPATH.strip(), headers=USERAGINT, timeout=5, verify=False,allow_redirects=False)
+		#print(Go.url,Go.status_code)
+		if Go.status_code in [301, 302, 200 , 201 ,204]:
+			print(Go.url,Go.status_code)
+			if len(Go.text) > 300:
+				print(Go.url,Go.status_code,"Done BYPASS")
+	except KeyboardInterrupt:
+			os._exit(1)
+	except:
+		pass
+
+
+def FindAdmin(Domain):
+	print(Domain)
+	if not Domain.startswith(('http://', 'https://')):
+		Domain = "https://"+Domain
+	if not Domain.endswith('/'):
+		Domain = Domain+"/"
+	try:
+		CHACK = requests.get(Domain+"Hello-Sorry-Not-Found/", headers=USERAGINT, timeout=5, verify=False)
+		if not CHACK.status_code == 200:
+			#print(CHACK.url,CHACK.status_code)
+			Pool = PoolFire(138)
+			Pool.map(AdminBYPASS, PATH)
+			Pool.close() 
+			Pool.join()
+	except KeyboardInterrupt:
+			os._exit(1)
+	except:
+		pass
+
+
+
+if __name__ == '__main__':
+	try:
+		Domain = sys.argv[1]
+		Domains = open(Domain).readlines()
+		for Domain in Domains:
+			FindAdmin(Domain.strip())
+	except FileNotFoundError:
+		print(Domain + " File Not Found")
+	except IndexError:
+		try:
+			Domains = sys.stdin.readlines()
+			if len(Domains) <1:
+				os._exit(1)
+			for Domain in Domains:
+				FindAdmin(Domain.strip())
+		except KeyboardInterrupt:
+			os._exit(1)
